@@ -1,54 +1,75 @@
-<header>
 
-<!--
-  <<< Author notes: Course header >>>
-  Read <https://skills.github.com/quickstart> for more information about how to build courses using this template.
-  Include a 1280×640 image, course name in sentence case, and a concise description in emphasis.
-  In your repository settings: enable template repository, add your 1280×640 social image, auto delete head branches.
-  Next to "About", add description & tags; disable releases, packages, & environments.
-  Add your open source license, GitHub uses the MIT license.
--->
+# Word 中英双语图名自动插入脚本
 
-# TBD-course-name
+📑 专为中文学位论文设计的Word自动化脚本，支持自动编号、章节匹配和智能翻译建议
 
-_TBD-course-description_
+## 功能特性
 
-</header>
+- **自动化编号**  
+  自动生成符合"图X.Y"和"Fig X.Y"格式的连续编号（X=章节号，Y=图序号）
 
-<!--
-  <<< Author notes: Step 1 >>>
-  Choose 3-5 steps for your course.
-  The first step is always the hardest, so pick something easy!
-  Link to docs.github.com for further explanations.
-  Encourage users to open new tabs for steps!
-  TBD-step-1-notes.
--->
+- **双语支持**  
+  单次操作同时插入中英文图名，中英文上下自动对齐
 
-## Step 1: TBD-step-1-name
+- **智能章节号提取**  
+  自动识别最近的"标题 1"样式段落，提取"第X章"中的数字编号
 
-_Welcome to "TBD-course-name"! :wave:_
+- **翻译建议系统**  
+  内置专业术语词典（可扩展），自动提供英文翻译建议
 
-TBD-step-1-information
+- **错误防御机制**  
+  智能检测标题样式异常，提供中文错误指引
 
-**What is _TBD-term-1_**: TBD-definition-1
+## 使用说明
 
-### :keyboard: Activity: TBD-step-1-name
+### 安装方法
+1. 打开Word文档，按 `Alt+F11` 进入VBA编辑器
+2. 右击项目资源管理器 → 导入 → 选择`.bas`文件
+3. 关闭VBA编辑器，将文档另存为`.docm`格式
 
-1. Open a new browser tab, and work on the steps in your second tab while you read the instructions in this tab.
-1. TBD-step-1-instructions.
-1. Wait about 20 seconds then refresh this page (the one you're following instructions from). [GitHub Actions](https://docs.github.com/en/actions) will automatically update to the next step.
+### 操作演示
+1. 将光标定位到需要插入图名的位置
+2. 按 `Alt+F8` 打开宏对话框 → 选择 `InsertFigureCaption`
+3. 按提示输入中英文图名：
+   ![输入示例](https://via.placeholder.com/400x200?text=输入中文图名→自动建议英文翻译)
 
-<footer>
+4. 生成效果示例：
+   ```
+   图2.1 膨胀土击实曲线
+   Fig 2.1 Expansive soil compaction curve
+   ```
 
-<!--
-  <<< Author notes: Footer >>>
-  Add a link to get support, GitHub status page, code of conduct, license link.
--->
+### 参数配置
+- **扩展翻译词典**  
+  修改 `TranslateToEnglish` 函数中的字典数据：
+  ```vba
+  dict.Add "你的术语", "your translation"
+  ```
 
----
+- **调整编号格式**  
+  修改 `InsertFigureCaption` 中的格式字符串：
+  ```vba
+  .TypeText text:="图" & chapNum & "."
+  ' 改为其他格式如："Figure " & chapNum & "-"
+  ```
 
-Get help: [TBD-support](TBD-support-link) &bull; [Review the GitHub status page](https://www.githubstatus.com/)
+## 注意事项
 
-&copy; 2023 TBD-copyright-holder &bull; [Code of Conduct](https://www.contributor-covenant.org/version/2/1/code_of_conduct/code_of_conduct.md) &bull; [MIT License](https://gh.io/mit)
+⚠️ **必看提示**  
+1. 确保章节标题使用"标题 1"样式
+2. 章节标题必须包含"第X章"格式（如：`第三章 实验结果`）
+3. 首次使用需在Word信任中心启用宏
+4. 英文翻译建议需自行扩展术语词典
 
-</footer>
+## 贡献指南
+
+欢迎通过 Issue 或 PR 提交：
+- 发现BUG报告时请附上：
+  - Word版本信息
+  - 触发问题的操作步骤
+  - 相关章节标题内容
+
+- 新增翻译术语请按格式提交：
+  ```vba
+  dict.Add "新术语", "new_translation"
+  ```
