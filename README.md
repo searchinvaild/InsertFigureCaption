@@ -2,6 +2,8 @@
 # Word 中英双语图名自动插入脚本
 
 📑 专为中文学位论文设计的Word自动化脚本，支持自动编号、章节匹配和智能翻译建议
+![WINWORD_YCWAoBdaFW200701](https://github.com/user-attachments/assets/9b35513f-25aa-454f-9692-11e6cc6edb48)
+
 
 ## 功能特性
 
