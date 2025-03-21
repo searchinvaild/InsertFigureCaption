@@ -1,0 +1,135 @@
+Option Explicit
+
+Sub InsertFigureCaption()
+    On Error GoTo ErrorHandler
+    
+    ' 获取用户输入
+    Dim strChinese As String, strEnglish As String
+    strChinese = InputBox("请输入中文图名（无需带编号）：", "自定义图名")
+    If strChinese = "" Then Exit Sub
+    strEnglish = InputBox("请输入英文图名（无需带编号）：", "自定义图名", TranslateToEnglish(strChinese))
+    If strEnglish = "" Then Exit Sub
+    
+    ' 生成题注
+    Dim chapNum As String
+    Dim titeNum As String
+    chapNum = GetChapterNumber(Selection.Range)
+    titeNum = "1"
+    
+    With Selection
+        .TypeText text:="图" & chapNum & "."
+        .Fields.Add Range:=.Range, Type:=wdFieldEmpty, _
+            text:="SEQ 图 \* ARABIC \s " & titeNum, PreserveFormatting:=True
+        .TypeText text:=" " & strChinese & vbCrLf
+        .TypeText text:="Fig " & chapNum & "."
+        .Fields.Add Range:=.Range, Type:=wdFieldEmpty, _
+            text:="SEQ fig \* ARABIC \s " & titeNum, PreserveFormatting:=True
+        .TypeText text:=" " & strEnglish
+    End With
+    
+    Exit Sub
+ErrorHandler:
+    MsgBox "错误：" & Err.Description & vbCrLf & "可能原因：" & vbCrLf & _
+           "1. 未应用'标题 1'样式" & vbCrLf & _
+           "2. 章节标题格式非'第X章'", vbCritical
+End Sub
+
+Function GetChapterNumber(rng As Range) As String
+    Dim currentPara As Paragraph
+    Set currentPara = rng.Paragraphs(1)
+    
+    ' 向上搜索最近的标题 1 样式
+    Do While Not currentPara Is Nothing
+        If currentPara.Style.NameLocal = "标题 1" Then ' 使用本地化样式名
+            GetChapterNumber = ExtractChapterNumber(currentPara.Range.text)
+            Exit Function
+        End If
+        Set currentPara = currentPara.Previous
+    Loop
+    
+    GetChapterNumber = "0"
+End Function
+
+Function ExtractChapterNumber(headingText As String) As String
+    ' 使用正则表达式提取中文数字
+    Dim regEx As Object, matches As Object
+    Set regEx = CreateObject("VBScript.RegExp")
+    regEx.Pattern = "第([一二三四五六七八九十百]+)章"
+    regEx.Global = True
+    
+    If regEx.Test(headingText) Then
+        Set matches = regEx.Execute(headingText)
+        ExtractChapterNumber = CStr(ConvertChineseNumber(matches(0).SubMatches(0)))
+    Else
+        ExtractChapterNumber = "0"
+    End If
+End Function
+
+' 其余函数（ConvertChineseNumber、TranslateToEnglish）保持原版
+
+' 增强版中文数字转换
+Function ConvertChineseNumber(strChinese As String) As Integer
+    Static dict As Object
+    If dict Is Nothing Then
+        Set dict = CreateObject("Scripting.Dictionary")
+        dict.CompareMode = vbTextCompare
+        dict.Add "一", 1
+        dict.Add "二", 2
+        dict.Add "三", 3
+        dict.Add "四", 4
+        dict.Add "五", 5
+        dict.Add "六", 6
+        dict.Add "七", 7
+        dict.Add "八", 8
+        dict.Add "九", 9
+        dict.Add "十", 10
+        dict.Add "百", 100
+        dict.Add "千", 1000
+    End If
+    
+    Dim result As Integer, temp As Integer
+    Dim i As Integer
+    For i = 1 To Len(strChinese)
+        Dim char As String
+        char = Mid(strChinese, i, 1)
+        
+        If dict.Exists(char) Then
+            Select Case dict(char)
+                Case 1 To 9
+                    temp = dict(char)
+                Case 10
+                    result = IIf(result = 0, 1, result) * 10
+                Case 100
+                    result = result * 100
+                Case 1000
+                    result = result * 1000
+            End Select
+        End If
+    Next
+    ConvertChineseNumber = result + temp
+End Function
+
+' 智能翻译建议（示例）
+Function TranslateToEnglish(strChinese As String) As String
+    Dim dict As Object
+    Set dict = CreateObject("Scripting.Dictionary")
+    dict.CompareMode = vbTextCompare
+    dict.Add "膨胀土", "expansive soil"
+    dict.Add "击实曲线", "compaction curve"
+    dict.Add "微观结构", "microstructure"
+    dict.Add "磷石膏", "phosphogypsum"
+    dict.Add "X射线衍射", "X-ray diffraction"
+    
+    Dim terms() As String
+    terms = Split(strChinese, " ")
+    Dim i As Integer
+    For i = 0 To UBound(terms)
+        If dict.Exists(terms(i)) Then
+            terms(i) = dict(terms(i))
+        Else
+            terms(i) = "[" & terms(i) & "]" ' 标记未翻译词汇
+        End If
+    Next
+    TranslateToEnglish = LCase(Join(terms, " "))
+End Function
+
